@@ -34,12 +34,12 @@ def generate_itinerary():
     data=request.json
     try:
         # Collect user inputs from form
-        destination = request.form.get('destination')
-        budget = request.form.get('budget')
-        vibe = request.form.get('vibe')
-        preferences = request.form.get('preferences')
-        start_date = request.form.get('start_date')
-        end_date = request.form.get('end_date')
+        destination = data.get('destination')
+        budget = data.get('budget')
+        vibe = data.get('vibe')
+        preferences = data.get('preferences')
+        start_date = data.get('start_date')
+        end_date = data.get('end_date')
 
         # Construct the AI prompt
         prompt = f"""
@@ -64,13 +64,13 @@ def generate_itinerary():
         Keep it conversational and well-formatted using headings.
         """
         ai_plan = generate_trip_with_groq(prompt)
-        return jsonify({"plan": ai_plan})
+        return jsonify({"success": True, "itinerary": ai_plan})
 
     except Exception as e:
         print(f"⚠️ Error while generating trip plan: {e}")
         return jsonify({
-            "plan": "Sorry, something went wrong while creating your trip plan. "
-                    "Please check your inputs and try again later."
+            "success": False,
+            "error": "Something went wrong while creating your trip plan."
         })
         
 

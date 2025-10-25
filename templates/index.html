@@ -201,7 +201,7 @@ return result.plan;
 
       try {
         // ✅ Correct route name that matches Flask
-        const response = await fetch("/generate_trip", {
+        const response = await fetch("/generate_itinerary", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(data)
