@@ -209,7 +209,7 @@ return result.plan;
 
         const result = await response.json();
 
-        if (response.ok) {
+        if (result.success && result.itinerary) {
           output.innerHTML = `<h3>🌴 Your AI-crafted Itinerary:</h3><p>${result.plan.replace(/\n/g, "<br>")}</p>`;
         } else {
           output.innerHTML = `<p style="color:red;">❌ Error: ${result.plan}</p>`;
