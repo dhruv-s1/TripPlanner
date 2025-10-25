@@ -14,7 +14,7 @@ def generate_trip_with_groq(prompt):
         "Content-Type": "application/json"
     }
     data = {
-        "model": "llama3.3-70b",  # correct model name
+        "model": "llama3-8b-8192",  # correct model name
         "messages": [
             {"role": "system", "content": "You are an expert AI travel planner who creates detailed, creative, and budget-friendly itineraries."},
             {"role": "user", "content": prompt}
