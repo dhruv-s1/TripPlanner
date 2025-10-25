@@ -1,12 +1,29 @@
 from flask import Flask, render_template, request, jsonify
 import requests
 import json
+import os
 
 app = Flask(__name__)
 
-# URL of the locally running Ollama model
-OLLAMA_URL = "http://localhost:11434/api/generate"
-MODEL_NAME = "llama3"  # You can rename if you use llama3:8b or another variant
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+
+def generate_trip_with_groq(prompt):
+    url = "https://api.groq.com/openai/v1/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {GROQ_API_KEY}",
+        "Content-Type": "application/json"
+    }
+    data = {
+        "model": "llama3-8b-8192",
+        "messages": [
+            {"role": "system", "content": "You are an expert AI travel planner who creates detailed, creative, and budget-friendly itineraries."},
+            {"role": "user", "content": prompt}
+        ]
+    }
+
+    response = requests.post(url, headers=headers, json=data)
+    response_data = response.json()
+    return response_data["choices"][0]["message"]["content"] 
 
 @app.route('/')
 def index():
@@ -14,6 +31,7 @@ def index():
 
 @app.route('/generate_itinerary', methods=['POST'])
 def generate_itinerary():
+    data=request.json
     try:
         # Collect user inputs from form
         destination = request.form.get('destination')
@@ -45,26 +63,16 @@ def generate_itinerary():
 
         Keep it conversational and well-formatted using headings.
         """
-
-        # Send to Llama 3 via Ollama API
-        payload = {
-            "model": MODEL_NAME,
-            "prompt": prompt,
-            "stream": False,
-            "temperature": 0.8
-        }
-
-        response = requests.post(OLLAMA_URL, json=payload)
-        response.raise_for_status()
-
-        # Parse the response text
-        result = response.json()
-        itinerary_text = result.get("response", "No response received from model.")
-
-        return jsonify({"success": True, "itinerary": itinerary_text})
+        ai_plan = generate_trip_with_groq(prompt)
+        return jsonify({"plan": ai_plan})
 
     except Exception as e:
-        return jsonify({"success": False, "error": str(e)})
+        print(f"⚠️ Error while generating trip plan: {e}")
+        return jsonify({
+            "plan": "Sorry, something went wrong while creating your trip plan. "
+                    "Please check your inputs and try again later."
+        })
+        
 
 if __name__ == "__main__":
-    app.run(port=80)
+    app.run(host="0.0.0.0", port=10000)
