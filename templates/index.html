@@ -195,18 +195,27 @@ return result.plan;
       e.preventDefault();
       output.innerHTML = "<p>⏳ Crafting your personalized travel plan... Please wait!</p>";
 
+      // Collect form data into a JSON object
       const formData = new FormData(form);
-      const response = await fetch('/generate_itinerary', {
-        method: 'POST',
-        body: formData
-      });
+      const data = Object.fromEntries(formData.entries());
 
-      const result = await response.json();
+      try {
+        // ✅ Correct route name that matches Flask
+        const response = await fetch("/generate_trip", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
 
-      if (result.success) {
-        output.innerHTML = `<h3>🌴 Your AI-crafted Itinerary:</h3><p>${result.itinerary}</p>`;
-      } else {
-        output.innerHTML = `<p style="color:red;">❌ Error: ${result.error}</p>`;
+        const result = await response.json();
+
+        if (response.ok) {
+          output.innerHTML = `<h3>🌴 Your AI-crafted Itinerary:</h3><p>${result.plan.replace(/\n/g, "<br>")}</p>`;
+        } else {
+          output.innerHTML = `<p style="color:red;">❌ Error: ${result.plan}</p>`;
+        }
+      } catch (error) {
+        output.innerHTML = `<p style="color:red;">⚠️ Network error: ${error.message}</p>`;
       }
 
       output.scrollIntoView({ behavior: "smooth" });
